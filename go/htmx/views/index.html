@@ -1,0 +1,62 @@
+{{ block "index" . }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Index</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script 
+      src="https://unpkg.com/htmx.org@1.9.11" 
+      integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" 
+      crossorigin="anonymous">
+    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/debug.js"></script>
+  </head>
+  <body>
+    {{ template "form" .Form }}
+    <hr />
+    {{ template "contacts" .Data }}
+    <script> 
+    // Handle 422 status with HTMX
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.body.addEventListener('htmx:beforeSwap', (evt) => {
+        if (evt.detail.xhr.status === 422) {
+          evt.detail.shouldSwap = true;
+          evt.detail.isError = false;
+        }
+      });
+    });
+    </script>
+  </body>
+</html>
+{{ end }} 
+
+{{ block "form" . }}
+<!-- <form hx-swap="outerHTML" hx-post="/contacts"> -->
+<form hx-post="/contacts">
+  Name: 
+  <input type="text" name="name" {{ if .Values.name }} value="{{ .Values.name }}" {{ end }} />
+  Email: 
+  <input type="text" name="email" {{ if .Values.email }} value="{{ .Values.email }}" {{ end }} />
+  {{ if .Errors }} <div style="color: red">{{ .Errors.email }}</div> {{ end }}
+  <button type="submit">Create Contact</button>
+</form>
+{{ end }}
+
+{{ block "contacts" . }}
+<div hx-ext="debug" id="contacts" style="display: flex; flex-direction: column;">
+  {{ range .Contacts }}
+  {{ template "contact" . }}
+  {{ end }}
+</div>
+{{ end }}
+
+{{ block "contact" . }}
+<span>Name: {{ .Name }} - Email: {{ .Email }}</span>
+{{ end }}
+
+{{ block "obb-contact" . }}
+<div id="contacts" hx-swap-oob="afterbegin">
+  {{ template "contact" . }}
+</div>
+{{ end }}

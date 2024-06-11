@@ -12,10 +12,13 @@
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = nixpkgs.lib.systems.flakeExposed;
-      debug = true;
-      imports = [];
-      flake = {};
+      systems = [
+        "x86_64-linux" # 64bit Intel/AMD Linux
+        "x86_64-darwin" # 64bit Intel Darwin (macOS)
+        "aarch64-linux" # 64bit ARM Linux
+        "aarch64-darwin" # 64bit ARM Darwin (macOS)
+      ];
+
       perSystem = {
         self',
         inputs',
@@ -25,8 +28,7 @@
         ...
       }: let
         name = "bash-hello";
-        lastModifiedDate = self'.lastModifiedDate or self'.lastModified or "19700101";
-        version = builtins.substring 0 8 lastModifiedDate;
+        version = "0.1.0";
       in {
         packages = {
           default = pkgs.writeShellApplication {

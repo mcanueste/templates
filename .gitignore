@@ -22,3 +22,4 @@ go.work
 **/tmp/**
 **/result
 **/.devenv
+.venv

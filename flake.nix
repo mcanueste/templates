@@ -44,6 +44,11 @@
             description = "A simple bash application template";
             path = ./templates/bash-application;
           };
+
+          python-devshell = {
+            description = "A Python development shell";
+            path = ./templates/python/devshell;
+          };
         };
       };
     };

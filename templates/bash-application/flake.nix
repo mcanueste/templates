@@ -33,7 +33,7 @@
         packages = {
           default = pkgs.writeShellApplication {
             inherit name;
-            runtimeInputs = with pkgs; [coreutils];
+            runtimeInputs = [pkgs.coreutils];
             text = ''
               echo "Hello, world!"
             '';
@@ -42,10 +42,21 @@
           docker = pkgs.dockerTools.buildImage {
             inherit name;
             tag = version;
+            created = "now";
+            copyToRoot = pkgs.buildEnv {
+              name = "image-root";
+              paths = [
+                pkgs.bashInteractive
+                pkgs.coreutils
+                self'.packages.default
+              ];
+              pathsToLink = ["/bin"];
+            };
             config = {
-              Cmd = ["${self'.packages.default}/bin/${name}"];
+              Cmd = ["bash-hello"];
               Env = [
                 "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                "PATH=/bin/"
               ];
             };
           };

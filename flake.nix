@@ -45,6 +45,11 @@
             path = ./templates/bash-application;
           };
 
+          go-htmx = {
+            description = "A Go HTML application template";
+            path = ./templates/go/htmx;
+          };
+
           python-devshell = {
             description = "A Python development shell";
             path = ./templates/python/devshell;

@@ -50,6 +50,11 @@
             path = ./templates/go/htmx;
           };
 
+          rust-hello = {
+            description = "A Rust application template";
+            path = ./templates/rust/hello;
+          };
+
           python-devshell = {
             description = "A Python development shell";
             path = ./templates/python/devshell;

@@ -31,7 +31,7 @@
         # Define a devShell with packages that are useful for templates
         devShells.default = pkgs.mkShell {
           name = "templates";
-          buildInputs = [pkgs.make pkgs.just pkgs.jq];
+          buildInputs = [pkgs.gnumake pkgs.just pkgs.jq];
         };
 
         # TODO package templates here for example runs

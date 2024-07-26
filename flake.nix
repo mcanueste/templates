@@ -41,28 +41,28 @@
       flake = {
         templates = {
           bash-application = {
-            description = "Simple bash application template";
-            path = ./templates/bash-application;
+            description = "Bash application template";
+            path = ./bash/application;
           };
 
           go-htmx = {
             description = "Go HTML application template";
-            path = ./templates/go/htmx;
+            path = ./go/htmx;
           };
 
           rust-hello = {
             description = "Rust application template";
-            path = ./templates/rust/hello;
+            path = ./rust/hello;
           };
 
-          python-typer= {
+          python-typer = {
             description = "Typer CLI template";
-            path = ./templates/python/typer;
+            path = ./python/typer;
           };
 
           python-devshell = {
             description = "Python development shell template";
-            path = ./templates/python/devshell;
+            path = ./python/devshell;
           };
         };
       };

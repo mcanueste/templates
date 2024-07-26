@@ -1,47 +1,23 @@
 {
-  description = "Example Typer CLI application project.";
+  description = "Typer CLI Hello World";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    devenv.url = "github:cachix/devenv";
-    nixpkgs-python.url = "github:cachix/nixpkgs-python"; # cache for all different python versions
-
-    mk-shell-bin.url = "github:rrbutani/nix-mk-shell-bin";
-    nix2container = {
-      url = "github:nlewo/nix2container";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
-
-  nixConfig = {
-    extra-substituters = [
-      "https://cache.nixos.org"
-      "https://devenv.cachix.org"
-      "https://nixpkgs-python.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-      "nixpkgs-python.cachix.org-1:hxjI7pFxTyuTHn2NkvWCrAUcNZLNS3ZAvfYNuYifcEU="
-    ];
   };
 
   outputs = inputs @ {
     nixpkgs,
     flake-parts,
-    devenv,
-    nixpkgs-python,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      # systems = nixpkgs.lib.systems.flakeExposed;
-      systems = ["x86_64-linux"];
-      debug = true;
-      imports = [
-        inputs.devenv.flakeModule
+      systems = [
+        "x86_64-linux" # 64bit Intel/AMD Linux
+        "x86_64-darwin" # 64bit Intel Darwin (macOS)
+        "aarch64-linux" # 64bit ARM Linux
+        "aarch64-darwin" # 64bit ARM Darwin (macOS)
       ];
-      flake = {};
       perSystem = {
         self',
         inputs',
@@ -50,84 +26,66 @@
         config,
         ...
       }: let
-        name = "typer-hello";
-        lastModifiedDate = self'.lastModifiedDate or self'.lastModified or "19700101";
-        version = builtins.substring 0 8 lastModifiedDate;
+        pythonPackages = pkgs.python311Packages;
+
+        install-deps = pkgs.writeShellScriptBin "install-deps" ''
+          #!/usr/bin/env bash
+          uv pip install --no-deps -r requirements/requirements.txt -r requirements/requirements-dev.txt
+        '';
+
+        compile-deps = pkgs.writeShellScriptBin "compile-deps" ''
+          #!/usr/bin/env bash
+          uv pip compile \
+            --upgrade \
+            --no-header \
+            --generate-hashes \
+            --emit-index-annotation \
+            --annotation-style line \
+            -o requirements/requirements.txt \
+            requirements/requirements.in
+
+          uv pip compile \
+            --upgrade \
+            --no-header \
+            --generate-hashes \
+            --emit-index-annotation \
+            --annotation-style line \
+            -o requirements/requirements-dev.txt \
+            requirements/requirements-dev.in
+        '';
       in {
-        # packages = {
-        #   # default = pkgs.python39Packages.buildPythonPackage {
-        #   default = pkgs.python39Packages.buildPythonApplication {
-        #     inherit name version;
-        #     pyproject = true;
-        #     src = ./.;
-        #     build-system = [
-        #       pkgs.python39Packages.setuptools-scm
-        #     ];
-        #     doCheck = false;
-        #     # buildInputs = []; # build and/or run-time (ie. non-Python dependencies)
-        #     # nativeBuildInputs = []; # build-time only (ie. setup_requires)
-        #     # propagatedBuildInputs = []; # build-time only propogated (ie. install_requires)
-        #     # nativeCheckInputs = []; # checkPhase only (ie. tests_require)
-        #     # pythonRuntimeDepsCheckHook = "ls -alF";
-        #   };
-        # };
-        packages.default = pkgs.dockerTools.streamNixShellImage {
-          inherit name;
-          tag = "latest";
-          drv = config.packages.container-shell;
+        _module.args.pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true; # allow unfree packages, i.e. cuda packages
         };
-        # packages.default = pkgs.dockerTools.buildImage config.packages.container-shell;
 
-        devenv.shells.default = {
-          inherit name;
+        devShells.default = pkgs.mkShell {
+          name = "devshell";
+          venvDir = "./.venv";
+          buildInputs = [
+            pythonPackages.python # python interpreter
+            pythonPackages.venvShellHook # venv hook for creating/activating
 
-          languages.python = {
-            enable = true;
-            package = nixpkgs-python.packages.${system}."3.9";
-            venv = {
-              enable = true;
-              quiet = true;
-            };
-          };
-
-          packages = [
-            # config.packages.default
+            # system packages to install to the environment
             pkgs.uv
+            pkgs.pyright
+            pkgs.pre-commit
+
+            # scripts
+            install-deps
+            compile-deps
           ];
 
-          imports = [
-            # This is just like the imports in devenv.nix.
-            # See https://devenv.sh/guides/using-with-flake-parts/#import-a-devenv-module
-            # ./devenv-foo.nix
-          ];
+          # Run only after creating the virtual environment
+          postVenvCreation = ''
+            unset SOURCE_DATE_EPOCH
+          '';
 
-          devcontainer.enable = true;
-          # containers = {
-          #   ${name} = {
-          #     inherit name;
-          #   };
-          # };
-
-          env = {
-            # Environment variables to be exposed inside the developer environment.
-            # NIX_LD = pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
-            # NIX_LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [pkgs.stdenv.cc]}";
-          };
-
-          # enterShell = ''
-          #   uv pip install -r requirements.txt
-          # '';
-
-          pre-commit.hooks = {
-            # format nix code
-            alejandra.enable = true;
-            # lint shell scripts
-            shellcheck.enable = true;
-            # format ruff for python code
-            ruff.enable = true;
-          };
-
-          starship.enable = true;
+          # Run on each venv activation.
+          postShellHook = ''
+            unset SOURCE_DATE_EPOCH
+            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$NIX_LD_LIBRARY_PATH"
+          '';
         };
       };
     };

@@ -1,7 +1,10 @@
+"""Main module of the CLI."""
+
 import typer
 
 
-def main():
+def main() -> None:
+    "'Hello Worl' CLI."
     print("Hello World")
 
 

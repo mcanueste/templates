@@ -1,0 +1,32 @@
+default_stages: [pre-commit, pre-push, manual]
+
+repos:
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: 34e6222063368363776e1a5cd2b67494b003b309 # v0.5.3
+      hooks:
+        - alias: ruff-format-check
+          id: ruff-format
+          args: [ --check ]
+          types_or: [ python, pyi, jupyter ]
+
+        - alias: ruff-check
+          id: ruff
+          types_or: [ python, pyi, jupyter ]
+
+        - alias: ruff-format
+          id: ruff-format
+          types_or: [ python, pyi, jupyter ]
+
+        - alias: ruff
+          id: ruff
+          args: [ --fix, --exit-non-zero-on-fix ] # --unsafe-fixes can be used for some autofixes i.e. F841
+          types_or: [ python, pyi, jupyter ]
+
+    - repo: local
+      hooks:
+        # Use the system's pyright installation as pre-commit uses an empty pyenv which causes false positives.
+        - id: pyright
+          name: pyright
+          language: system
+          entry: bash -c '[ "$(uname)" == "Darwin" ] || pyright "$@"' --
+          types: [python, pyi, jupyter]

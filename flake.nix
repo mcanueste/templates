@@ -60,6 +60,11 @@
             path = ./python/typer;
           };
 
+          python-django = {
+            description = "Python Django framework template";
+            path = ./python/django;
+          };
+
           python-devshell = {
             description = "Python development shell template";
             path = ./python/devshell;

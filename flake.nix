@@ -55,6 +55,11 @@
             path = ./rust/hello;
           };
 
+          rust-bevy= {
+            description = "Rust bevy game engine template";
+            path = ./rust/bevy;
+          };
+
           python-typer = {
             description = "Typer CLI template";
             path = ./python/typer;

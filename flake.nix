@@ -31,11 +31,12 @@
         # Define a devShell with packages that are useful for templates
         devShells.default = pkgs.mkShell {
           name = "templates";
-          buildInputs = [pkgs.gnumake pkgs.just pkgs.jq];
+          buildInputs = [
+            pkgs.gnumake
+            pkgs.just
+            pkgs.jq
+          ];
         };
-
-        # TODO package templates here for example runs
-        # packages = {};
       };
 
       flake = {
@@ -55,7 +56,7 @@
             path = ./rust/hello;
           };
 
-          rust-bevy= {
+          rust-bevy = {
             description = "Rust bevy game engine template";
             path = ./rust/bevy;
           };
@@ -73,6 +74,16 @@
           python-devshell = {
             description = "Python development shell template";
             path = ./python/devshell;
+          };
+
+          reco-default = {
+            description = "Recogni Default Flake";
+            path = ./reco/default;
+          };
+
+          reco-sdk = {
+            description = "Recogni SDK Flake";
+            path = ./reco/sdk;
           };
         };
       };

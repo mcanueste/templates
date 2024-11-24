@@ -56,6 +56,11 @@
             path = ./rust/hello;
           };
 
+          rust-clap = {
+            description = "Rust CLI with Clap template";
+            path = ./rust/clap;
+          };
+
           rust-bevy = {
             description = "Rust bevy game engine template";
             path = ./rust/bevy;

@@ -1,0 +1,28 @@
+# Display help information
+default:
+  @just --list
+
+# Format the codebase
+format:
+  cargo fmt
+
+# Fail if the codebase is not formatted
+format-check:
+  cargo fmt -- --check
+
+# Run clippy and fail on warnings
+clippy:
+  cargo clippy -- -D warnings
+
+# Run tests with nextest
+test:
+  cargo nextest run
+
+# Run coverage with llvm-cov and nextest
+coverage:
+  # cargo llvm-cov --workspace --all -- --exclude-pattern=/.cargo,/usr/include,/usr/lib
+  cargo llvm-cov nextest --workspace
+
+# Check for security vulnerabilities
+audit:
+  cargo audit

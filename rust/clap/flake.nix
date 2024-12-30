@@ -47,7 +47,14 @@
             ];
 
             buildInputs = [
+              pkgs.just
+              pkgs.rustfmt
               pkgs.clippy
+              pkgs.cargo-nextest
+              pkgs.cargo-llvm-cov
+              pkgs.rustc.llvmPackages.llvm
+              pkgs.cargo-audit
+              pkgs.cargo-watch
             ];
 
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
